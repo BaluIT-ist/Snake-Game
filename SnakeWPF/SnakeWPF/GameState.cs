@@ -1,9 +1,6 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Windows;
 
 namespace SnakeWPF
@@ -17,11 +14,12 @@ namespace SnakeWPF
         public int Score { get; private set; }
         public bool GameOver { get; private set; }
 
+        private readonly LinkedList<Direction>dirChanges= new LinkedList<Direction>();
+
         private readonly LinkedList<Position> snakePosition = new LinkedList<Position>();
         private readonly Random random = new Random();
-        private int rows;
 
-        public GameState(int row, int cols)
+        public GameState(int rows, int cols)
         {
             Rows = rows;
             Cols = cols;
@@ -98,9 +96,30 @@ namespace SnakeWPF
             snakePosition.RemoveLast();
         }
 
+        private Direction GetLastDirection()
+        {
+            if(dirChanges.Count == 0)
+            {
+                return Dir;
+            }
+            return dirChanges.Last.Value;
+        }
+
+        public bool CanChangeDirection(Direction newDir)
+        { 
+        if (dirChanges.Count == 2)
+            {
+                return false;
+            }
+        Direction LastDir= GetLastDirection();
+            return newDir != LastDir && newDir != LastDir.Oposite();
+        }
         public void ChangeDirection(Direction dir)
         {
-            Dir = dir;
+            if (CanChangeDirection(dir))
+            {
+                dirChanges.AddLast(dir);
+            }
         }
 
         private bool OutsideGrid(Position pos)
@@ -125,6 +144,12 @@ namespace SnakeWPF
 
         public void Move()
         {
+
+            if(dirChanges.Count > 0) 
+            {
+            Dir = dirChanges.First.Value;
+                dirChanges.RemoveLast();
+            }
             Position newHeadPos = HeadPosition().Translate(Dir);
             GridValue hit = WillHit(newHeadPos);
 
