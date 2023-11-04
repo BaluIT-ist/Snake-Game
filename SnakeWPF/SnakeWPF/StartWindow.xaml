@@ -26,21 +26,21 @@
 
 
         </Button>
-        <!--<Button x:Name="Menu_Btn"
+        <Button x:Name="Settings_Btn"
                 Background="LightBlue"
-                Content="Menu"
+                Content="Settings"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Height="45"
-                Width="120"
+                 VerticalAlignment="Top"
+                 Height="45"
+                 Width="120"
                 Click="Menu_Btn_Click"
-                Foreground="#00001c"
-                FontSize="20" Margin="0,207,0,0" RenderTransformOrigin="0.5,0.5"
-                Grid.Column="1">
+                  Foreground="#00001c"
+                  FontSize="20" Margin="0,207,0,0" RenderTransformOrigin="0.5,0.5"
+                 Grid.Column="1">
 
 
 
-        </Button>-->
+            </Button>
         <Button x:Name="Exit_Btn"
                 Background="LightBlue"
                 Content="Exit"

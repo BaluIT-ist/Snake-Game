@@ -33,7 +33,9 @@ namespace SnakeWPF
 
         private void Menu_Btn_Click(object sender, RoutedEventArgs e)
         {
-
+          SettingsWindow settingsWindow=new SettingsWindow();
+            settingsWindow.Show();
+            this  .Hide();
         }
 
         private void Exit_Btn_Click(object sender, RoutedEventArgs e)

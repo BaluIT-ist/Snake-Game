@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -35,34 +37,54 @@ namespace SnakeWPF
 
         public MainWindow()
         {
+            AppleEnum randomFood = FoodRandomDrop();
             gridValToImage.Add(GridValue.Empty, Images.Empty);
             gridValToImage.Add(GridValue.Snake, Images.Body);
-            gridValToImage.Add(GridValue.Food, Images.Food);
+            // gridValToImage.Add(GridValue.Food, Images.Food);
+            switch (randomFood)
+            {
+                case AppleEnum.RED_APPLE:
+                    gridValToImage.Add(GridValue.Food, Images.RedApple);
+                    break;
+                case AppleEnum.GREEN_APPLE:
+                    gridValToImage.Add(GridValue.Food, Images.GreenApple);
+                    break;
+                case AppleEnum.PINKDIAMOND_APPLE:
+                    gridValToImage.Add(GridValue.Food, Images.PinkDiamongApple);
+                    break;
+                case AppleEnum.GOLDEN_APPLE:
+                    gridValToImage.Add(GridValue.Food, Images.GoldenApple);
+                    break;
+            }
+
+
+
             InitializeComponent();
             gridImages = SetupGrid();
-            gameState=new GameState(rows,cols);
+            gameState = new GameState(rows, cols, randomFood);
         }
 
-        
 
-     private async Task RunGame()
+
+        private async Task RunGame()
         {
+            AppleEnum randomFood = FoodRandomDrop();
             Draw();
             await ShowCountDown();
             Overlay.Visibility = Visibility.Hidden;
             await GameLoop();
             await ShowGameOver();
-            gameState=new GameState(rows,cols);
+            gameState = new GameState(rows, cols, randomFood);
         }
-        
-        private async void Window_PreviewKeyDown(Object sender,KeyEventArgs e)
+
+        private async void Window_PreviewKeyDown(Object sender, KeyEventArgs e)
         {
-            if(Overlay.Visibility==Visibility.Visible)
+            if (Overlay.Visibility == Visibility.Visible)
             {
                 e.Handled = true;
             }
 
-            if(!gameRunning)
+            if (!gameRunning)
             {
                 gameRunning = true;
                 await RunGame();
@@ -76,10 +98,10 @@ namespace SnakeWPF
             {
                 return;
             }
-            switch (e.Key) 
-                {
+            switch (e.Key)
+            {
                 case Key.Left:
-                    gameState.ChangeDirection(Direction.Left); 
+                    gameState.ChangeDirection(Direction.Left);
                     break;
                 case Key.Right:
                     gameState.ChangeDirection(Direction.Right);
@@ -95,10 +117,31 @@ namespace SnakeWPF
 
         private async Task GameLoop()
         {
-            while (!gameState.GameOver) 
+            while (!gameState.GameOver)
             {
-            await Task.Delay(100);
+                await Task.Delay(100);
                 gameState.Move();
+
+                if (gameState.foodState == FoodStateEnum.ADD_FOOD)
+                {
+                    AppleEnum randomFood = FoodRandomDrop();
+                    gridValToImage.Remove(GridValue.Food);
+                    switch (randomFood)
+                    {
+                        case AppleEnum.RED_APPLE:
+                            gridValToImage.Add(GridValue.Food, Images.RedApple);
+                            break;
+                        case AppleEnum.GREEN_APPLE:
+                            gridValToImage.Add(GridValue.Food, Images.GreenApple);
+                            break;
+                        case AppleEnum.PINKDIAMOND_APPLE:
+                            gridValToImage.Add(GridValue.Food, Images.PinkDiamongApple);
+                            break;
+                        case AppleEnum.GOLDEN_APPLE:
+                            gridValToImage.Add(GridValue.Food, Images.GoldenApple);
+                            break;
+                    }
+                }
                 Draw();
             }
         }
@@ -111,20 +154,20 @@ namespace SnakeWPF
 
             for (int r = 0; r < rows; r++)
             {
-                for(int c = 0; c < cols; c++)
+                for (int c = 0; c < cols; c++)
                 {
                     Image image = new Image()
                     {
                         Source = Images.Empty,
                         RenderTransformOrigin = new Point(0.5, 0.5)
                     };
-                    images[r,c] = image;
+                    images[r, c] = image;
                     GameGrid.Children.Add(image);
-                
+
 
                 }
             }
-            
+
             return images;
         }
 
@@ -132,13 +175,13 @@ namespace SnakeWPF
         {
             DrawGrid();
             DrawSnakeHead();
-            Score_Text.Text= $"SCORE {gameState.Score}";
+            Score_Text.Text = $"SCORE {gameState.Score}";
         }
         private void DrawGrid()
         {
-            for (int r = 0; r < rows;r++)
+            for (int r = 0; r < rows; r++)
             {
-                for(int c = 0; c < cols;c++)
+                for (int c = 0; c < cols; c++)
                 {
                     GridValue gridVal = gameState.Grid[r, c];
                     gridImages[r, c].Source = gridValToImage[gridVal];
@@ -155,16 +198,16 @@ namespace SnakeWPF
 
 
             int rotation = dirToRotation[gameState.Dir];
-                image.RenderTransform= new RotateTransform(rotation);
+            image.RenderTransform = new RotateTransform(rotation);
         }
 
 
         private async Task DrawDeadSnake()
         {
             List<Position> positions = new List<Position>(gameState.SnakePosition());
-            for(int i = 0; i < positions.Count;i++) 
+            for (int i = 0; i < positions.Count; i++)
             {
-            Position pos = positions[i];
+                Position pos = positions[i];
                 ImageSource source = (i == 0) ? Images.DeadHead : Images.DeadBody;
                 gridImages[pos.Row, pos.Col].Source = source;
                 await Task.Delay(50);
@@ -172,9 +215,9 @@ namespace SnakeWPF
         }
         private async Task ShowCountDown()
         {
-            for (int i  = 3;i>=1;i--)
+            for (int i = 3; i >= 1; i--)
             {
-                OverlayText.Text=i.ToString();
+                OverlayText.Text = i.ToString();
                 await Task.Delay(500);
             }
         }
@@ -187,6 +230,74 @@ namespace SnakeWPF
             OverlayText.Text = "Press any key to restart!";
         }
 
+        /// <summary>
+        /// Red Apple has 80% chance to spawn
+        /// Green Apple has 10% chance to spawn
+        /// Pink Diamond Apple has 7.5% chance to spawn
+        /// Golden Apple has 2.5% chance to spawn
+        /// </summary>
+        /// <returns></returns>
+        //private AppleEnum FoodRandomDrop()
+        //{
 
+        //    Random random = new Random();
+        //    double chance=random.NextDouble();
+        //    if(chance < 0.80)
+        //    {
+        //        return AppleEnum.RED_APPLE;
+        //    }
+        //    else
+        //    {
+        //        if (chance < 0.90)
+        //        {
+        //            return AppleEnum.GREEN_APPLE;
+        //        }
+        //        else
+        //        {
+        //            if (chance < 0.975)
+        //            {
+        //                return AppleEnum.PINKDIAMOND_APPLE;
+        //            }
+        //            else
+        //            {
+        //                return AppleEnum.GOLDEN_APPLE;
+        //            }
+        //        }
+        //    }
+        //}
+
+        private AppleEnum FoodRandomDrop()
+        {
+            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+            {
+                byte[] randomNumber = new byte[4];
+                rng.GetBytes(randomNumber);
+                int intRandomNumber = BitConverter.ToInt32(randomNumber, 0);
+                double chance = (intRandomNumber & 0x7FFFFFFF) / (double)int.MaxValue;
+                if (chance < 0.50)
+                {
+                    return AppleEnum.RED_APPLE;
+                }
+                else
+                {
+                    if (chance < 0.70)
+                    {
+                        return AppleEnum.GREEN_APPLE;
+                    }
+                    else
+                   
+                    {
+                        if (chance < 0.90)
+                        {
+                            return AppleEnum.PINKDIAMOND_APPLE;
+                        }
+                        else
+                        {
+                            return AppleEnum.GOLDEN_APPLE;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

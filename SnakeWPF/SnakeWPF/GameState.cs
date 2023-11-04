@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace SnakeWPF
@@ -14,17 +15,21 @@ namespace SnakeWPF
         public int Score { get; private set; }
         public bool GameOver { get; private set; }
 
-        private readonly LinkedList<Direction>dirChanges= new LinkedList<Direction>();
+        private AppleEnum Apples { get; set; }
+        public FoodStateEnum foodState { get; set; }
+
+        private readonly LinkedList<Direction> dirChanges = new LinkedList<Direction>();
 
         private readonly LinkedList<Position> snakePosition = new LinkedList<Position>();
         private readonly Random random = new Random();
 
-        public GameState(int rows, int cols)
+        public GameState(int rows, int cols, AppleEnum randomFood)
         {
             Rows = rows;
             Cols = cols;
             Grid = new GridValue[rows, cols];
             Dir = Direction.Right;
+            Apples = randomFood;
 
             AddSnake();
             AddFood();
@@ -98,7 +103,7 @@ namespace SnakeWPF
 
         private Direction GetLastDirection()
         {
-            if(dirChanges.Count == 0)
+            if (dirChanges.Count == 0)
             {
                 return Dir;
             }
@@ -106,12 +111,12 @@ namespace SnakeWPF
         }
 
         public bool CanChangeDirection(Direction newDir)
-        { 
-        if (dirChanges.Count == 2)
+        {
+            if (dirChanges.Count == 2)
             {
                 return false;
             }
-        Direction LastDir= GetLastDirection();
+            Direction LastDir = GetLastDirection();
             return newDir != LastDir && newDir != LastDir.Oposite();
         }
         public void ChangeDirection(Direction dir)
@@ -142,12 +147,13 @@ namespace SnakeWPF
             return Grid[newHeadPos.Row, newHeadPos.Col];
         }
 
-        public void Move()
+        public async void Move()
         {
+            foodState = FoodStateEnum.NO_NEW_FOOD;
 
-            if(dirChanges.Count > 0) 
+            if (dirChanges.Count > 0)
             {
-            Dir = dirChanges.First.Value;
+                Dir = dirChanges.First.Value;
                 dirChanges.RemoveLast();
             }
             Position newHeadPos = HeadPosition().Translate(Dir);
@@ -166,16 +172,42 @@ namespace SnakeWPF
             else if (hit == GridValue.Food)
             {
                 AddHead(newHeadPos);
-                Score++;
+                AddScore();
+                await Task.Delay(10);
                 AddFood();
+
+                foodState = FoodStateEnum.ADD_FOOD;
             }
 
-        
-            }    
-            
-        }
-    }
+            foodState = FoodStateEnum.NO_NEW_FOOD;
 
-    
+        }
+
+        private void AddScore()
+        {
+            switch (Apples)
+            {
+                case AppleEnum.RED_APPLE:
+                    Score++;
+                    break;
+                case AppleEnum.GREEN_APPLE:
+                    Score = Score + 10;
+                    break;
+                case AppleEnum.PINKDIAMOND_APPLE:
+                    Score = Score + 25;
+                    break;
+                case AppleEnum.GOLDEN_APPLE:
+                    Score = Score + 100;
+                    break;
+            }
+
+        }
+
+
+
+    }
+}
+
+
 
 
