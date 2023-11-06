@@ -42,5 +42,31 @@ namespace SnakeWPF
         {
             System.Windows.Application.Current.Shutdown();
         }
+        private bool isFullscreen = false;
+        private WindowState previousWindowState;
+        private ResizeMode previousResizeMode;
+
+        private void ToggleFullS_Click(object sender, RoutedEventArgs e)
+        {
+            if (isFullscreen)
+            {
+                WindowStyle = WindowStyle.SingleBorderWindow;
+                WindowState = previousWindowState;
+                ResizeMode = previousResizeMode;
+            }
+            else
+            {
+                previousWindowState = WindowState;
+                previousResizeMode = ResizeMode;
+
+                WindowStyle = WindowStyle.None;
+                WindowState = WindowState.Maximized;
+                ResizeMode = ResizeMode.NoResize;
+            }
+
+            isFullscreen = !isFullscreen;
+        }
+
     }
+
 }

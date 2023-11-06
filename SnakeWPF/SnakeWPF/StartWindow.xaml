@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SnakeWPF"
         mc:Ignorable="d"
-        Title="BalooSnake" Height="450" Width="800">
+        Title="BalooSnake" Height="500" Width="800">
     <Grid Background="#96C5B0">
 
         <TextBlock FontSize="30" FontWeight="Bold" FontStyle="Italic" HorizontalAlignment="Center" Grid.Column="2" Foreground="#5EFC8D">
@@ -40,7 +40,7 @@
 
 
 
-            </Button>
+        </Button>
         <Button x:Name="Exit_Btn"
                 Background="LightBlue"
                 Content="Exit"
@@ -56,7 +56,32 @@
 
 
         </Button>
-        <Image Margin="62,27,344,77" Source="/Imagine WhatsApp 2023-11-03 la 12.54.28_8db1b908.jpg" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
+        <Button x:Name ="ToggleFullS" Content="Toggle Fullscreen" 
+                Click="ToggleFullS_Click"
+                Width="120" 
+                Height="44" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Top" 
+                Grid.Column="1" 
+                Margin="0,326,0,0"
+                Foreground="Black"
+                FontSize="14">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="LightBlue" />
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="FontSize" Value="10" />
+                    <Setter Property="BorderThickness" Value="2"  />
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#005EAE" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+        <Image Margin="61,27,345,132" Source="/Imagine WhatsApp 2023-11-03 la 12.54.28_8db1b908.jpg" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="0.997"/>
